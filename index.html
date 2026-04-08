@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolbox Sederhana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-5">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Text Tool Helper</h1>
+        
+        <label class="block text-sm font-medium text-gray-600 mb-2">Masukkan Teks:</label>
+        <textarea id="input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows="4" placeholder="Ketik sesuatu di sini..."></textarea>
+
+        <div class="mt-4 grid grid-cols-2 gap-2">
+            <button onclick="transformUpper()" class="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">UPPERCASE</button>
+            <button onclick="transformLower()" class="bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition">lowercase</button>
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-800"><strong>Statistik:</strong></p>
+            <p class="text-sm text-blue-600">Jumlah Karakter: <span id="charCount">0</span></p>
+            <p class="text-sm text-blue-600">Jumlah Kata: <span id="wordCount">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const charCount = document.getElementById('charCount');
+        const wordCount = document.getElementById('wordCount');
+
+        input.addEventListener('input', () => {
+            const text = input.value;
+            charCount.innerText = text.length;
+            wordCount.innerText = text.trim() ? text.trim().split(/\s+/).length : 0;
+        });
+
+        function transformUpper() {
+            input.value = input.value.toUpperCase();
+        }
+
+        function transformLower() {
+            input.value = input.value.toLowerCase();
+        }
+    </script>
+</body>
+</html>
