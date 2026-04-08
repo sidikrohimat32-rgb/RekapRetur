@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Retur TikTok Shop - Admin Tool</title>
+    <title>Rekap Retur TikTok Shop Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
@@ -13,79 +13,57 @@
 </head>
 <body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
 
-    <div class="max-w-6xl mx-auto text-slate-800">
+    <div class="max-w-[1400px] mx-auto text-slate-800">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
-                <h1 class="text-3xl font-bold">📦 Scan Retur TikTok</h1>
-                <p class="text-slate-500">Rekap paket kembali jadi lebih cepat & akurat.</p>
+                <h1 class="text-3xl font-bold">📦 Scan Retur Pro</h1>
+                <p class="text-slate-500 text-sm">Pelacakan otomatis berdasarkan ID Tracking & Detail Produk.</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="window.location.reload()" class="px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm">Reset Semua</button>
-                <button onclick="exportResult()" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-sm">Simpan Laporan (.csv)</button>
+                <button onclick="window.location.reload()" class="px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm">Reset</button>
+                <button onclick="exportResult()" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-sm">Simpan Laporan</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold mb-3 flex items-center text-blue-600">
-                        <span class="mr-2">1.</span> Siapkan Data
-                    </h3>
-                    <input type="file" id="csvFile" accept=".csv" class="text-xs w-full mb-2 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700">
-                    <p class="text-[10px] text-slate-400 italic leading-relaxed">Ekspor file CSV Retur dari TikTok Shop Seller Center terlebih dahulu.</p>
+                    <h3 class="font-bold mb-3 text-blue-600 text-sm italic underline">Langkah 1: Upload CSV</h3>
+                    <input type="file" id="csvFile" accept=".csv" class="text-xs w-full file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700">
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold mb-3 flex items-center text-blue-600">
-                        <span class="mr-2">2.</span> Scan Paket
-                    </h3>
-                    <input type="text" id="scannerInput" placeholder="Tempel ID / Scan Resi..." class="w-full p-3 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono">
-                    <p class="text-[10px] text-slate-400 mt-2">Arahkan kursor ke sini jika pakai barcode scanner. Tekan Enter untuk konfirmasi.</p>
+                    <h3 class="font-bold mb-3 text-blue-600 text-sm italic underline">Langkah 2: Scan Resi/ID</h3>
+                    <input type="text" id="scannerInput" placeholder="Scan Tracking ID di sini..." class="w-full p-3 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono">
                 </div>
 
                 <div class="bg-blue-700 p-6 rounded-2xl text-white shadow-xl shadow-blue-100">
-                    <p class="text-xs opacity-70 uppercase tracking-widest font-semibold mb-1">Paket Diterima</p>
+                    <p class="text-xs opacity-70 uppercase tracking-widest font-semibold">Berhasil Direkap</p>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-5xl font-bold" id="totalDone text-white">0</span>
+                        <span class="text-5xl font-bold" id="totalDone">0</span>
                         <span class="text-sm opacity-70"> / <span id="totalData">0</span> total</span>
                     </div>
-                </div>
-
-                <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200">
-                    <h3 class="font-bold text-amber-800 text-sm mb-2 flex items-center">
-                        💡 Panduan Singkat
-                    </h3>
-                    <ul class="text-[11px] text-amber-700 space-y-2 list-disc pl-4">
-                        <li><strong>Buka TikTok Seller Center</strong>, masuk ke menu pengembalian, lalu ekspor data ke format CSV.</li>
-                        <li><strong>Klik "Choose File"</strong> untuk memasukkan data yang sudah di-download tadi.</li>
-                        <li><strong>Gunakan Barcode Scanner</strong> atau ketik manual nomor resi paket fisik yang baru datang.</li>
-                        <li>Baris data akan otomatis <strong>berwarna hijau</strong> jika nomor resi/order cocok.</li>
-                        <li>Data tidak akan hilang jika Anda tidak menutup tab browser ini.</li>
-                    </ul>
                 </div>
             </div>
 
             <div class="lg:col-span-3">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[500px]">
-                    <div class="overflow-x-auto overflow-y-auto max-h-[70vh]">
+                    <div class="overflow-x-auto overflow-y-auto max-h-[75vh]">
                         <table class="w-full text-left border-collapse" id="dataTable">
                             <thead class="sticky-header">
-                                <tr class="bg-slate-50">
-                                    <th class="p-4 text-xs font-bold text-slate-500 border-b uppercase">ID Pesanan</th>
-                                    <th class="p-4 text-xs font-bold text-slate-500 border-b uppercase">No. Resi</th>
-                                    <th class="p-4 text-xs font-bold text-slate-500 border-b uppercase">Pembeli</th>
-                                    <th class="p-4 text-xs font-bold text-slate-500 border-b uppercase">Status</th>
+                                <tr class="bg-slate-50 text-[10px] uppercase text-slate-500 font-bold tracking-wider">
+                                    <th class="p-4 border-b">Tracking ID / Resi</th>
+                                    <th class="p-4 border-b">Nama Produk</th>
+                                    <th class="p-4 border-b">SKU</th>
+                                    <th class="p-4 border-b">Variasi</th>
+                                    <th class="p-4 border-b">Qty</th>
+                                    <th class="p-4 border-b">Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="tableBody" class="text-sm divide-y divide-slate-100">
+                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
                                 <tr>
-                                    <td colspan="4" class="p-20 text-center">
-                                        <div class="flex flex-col items-center opacity-30">
-                                            <span class="text-5xl mb-4">📂</span>
-                                            <p class="font-medium">Belum ada data diupload</p>
-                                        </div>
-                                    </td>
+                                    <td colspan="6" class="p-20 text-center opacity-40">Silakan unggah file CSV ekspor TikTok...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -98,6 +76,14 @@
     <script>
         let rawData = [];
         let completedCount = 0;
+
+        // Fungsi pencarian kolom yang fleksibel
+        function getVal(row, keys) {
+            for (let key of keys) {
+                if (row[key] !== undefined) return row[key];
+            }
+            return "N/A";
+        }
 
         document.getElementById('csvFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -119,19 +105,25 @@
             tbody.innerHTML = '';
             
             data.forEach((row) => {
-                const orderId = row['Order ID'] || row['Order ID '] || row['ID Pesanan'] || 'N/A';
-                const trackingNum = row['Tracking Number'] || row['Nomor Resi'] || row['Tracking Number '] || row['Resi'] || 'N/A';
-                const buyer = row['Buyer Name'] || row['Username Pembeli'] || row['Pembeli'] || 'N/A';
+                // Tracking ID / Resi
+                const tracking = getVal(row, ['Tracking ID', 'Tracking Number', 'Nomor Resi', 'ID Pelacakan', 'tracking_number']);
+                const orderId = getVal(row, ['Order ID', 'ID Pesanan', 'order_id']);
+                const product = getVal(row, ['Product Name', 'Nama Produk', 'product_name']);
+                const sku = getVal(row, ['Seller SKU', 'SKU Penjual', 'sku', 'SKU']);
+                const variation = getVal(row, ['Variation', 'Variasi', 'product_variation']);
+                const qty = getVal(row, ['Quantity', 'Jumlah', 'quantity', 'Qty']);
 
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-id', orderId.trim());
-                tr.setAttribute('data-resi', trackingNum.trim());
+                tr.setAttribute('data-resi', tracking.trim());
                 tr.className = "hover:bg-slate-50 transition-all";
                 tr.innerHTML = `
-                    <td class="p-4 font-mono text-[11px]">${orderId}</td>
-                    <td class="p-4 text-[11px] font-semibold">${trackingNum}</td>
-                    <td class="p-4 text-slate-600">${buyer}</td>
-                    <td class="p-4 status-cell text-center"><span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-full text-[10px] font-bold">PROSES</span></td>
+                    <td class="p-4"><div class="font-bold text-slate-800">${tracking}</div><div class="text-[9px] text-slate-400">${orderId}</div></td>
+                    <td class="p-4 max-w-[200px] truncate" title="${product}">${product}</td>
+                    <td class="p-4 font-mono text-slate-500">${sku}</td>
+                    <td class="p-4">${variation}</td>
+                    <td class="p-4 font-bold">${qty}</td>
+                    <td class="p-4 status-cell"><span class="bg-slate-100 text-slate-400 px-2 py-1 rounded text-[9px] font-bold">PROSES</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -151,7 +143,7 @@
 
                     if ((searchValue === id || searchValue === resi) && !row.classList.contains('row-done')) {
                         row.classList.add('row-done');
-                        row.querySelector('.status-cell').innerHTML = `<span class="bg-green-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">✅ SAMPAI</span>`;
+                        row.querySelector('.status-cell').innerHTML = `<span class="bg-green-600 text-white px-2 py-1 rounded text-[9px] font-bold shadow-sm">✅ SAMPAI</span>`;
                         completedCount++;
                         document.querySelector('#totalDone').innerText = completedCount;
                         found = true;
@@ -159,34 +151,29 @@
                     }
                 });
 
-                if (!found) {
-                    alert('Data tidak ditemukan, salah ID/Resi, atau sudah discan.');
-                }
+                if (!found) alert('Data tidak ditemukan atau sudah discan!');
                 this.value = '';
             }
         });
 
         function exportResult() {
             const rows = document.querySelectorAll('#tableBody tr');
-            let csvContent = "Order ID,Resi,Pembeli,Status\n";
-            
+            let csvContent = "Tracking ID,Nama Produk,SKU,Variasi,Qty,Status\n";
             rows.forEach(row => {
-                const id = row.getAttribute('data-id');
-                const resi = row.getAttribute('data-resi');
-                const buyer = row.children[2].innerText;
-                const status = row.classList.contains('row-done') ? "Sudah Sampai" : "Belum Ada";
-                csvContent += `${id},${resi},${buyer},${status}\n`;
+                if(row.children.length < 6) return;
+                const trk = row.getAttribute('data-resi');
+                const prd = row.children[1].innerText.replace(/,/g, '');
+                const sku = row.children[2].innerText;
+                const vars = row.children[3].innerText;
+                const qty = row.children[4].innerText;
+                const stts = row.classList.contains('row-done') ? "SUDAH SAMPAI" : "BELUM";
+                csvContent += `${trk},${prd},${sku},${vars},${qty},${stts}\n`;
             });
-
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Laporan_Retur_${new Date().toLocaleDateString()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "Rekap_Retur_Selesai.csv");
             link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
