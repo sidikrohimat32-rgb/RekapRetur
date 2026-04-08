@@ -3,68 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Retur TikTok Shop Pro</title>
+    <title>QC Retur Pro + Filter Duplikat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        .row-done { background-color: #d1fae5 !important; border-left: 5px solid #10b981; }
+        .row-match { background-color: #d1fae5 !important; border-left: 5px solid #10b981; }
+        .row-wrong { background-color: #fee2e2 !important; border-left: 5px solid #ef4444; }
         .sticky-header th { position: sticky; top: 0; background: #f8fafc; z-index: 10; }
+        .is-duplicate { border-left: 3px dashed #fbbf24; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8 font-sans">
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800">
 
-    <div class="max-w-[1400px] mx-auto text-slate-800">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div class="max-w-[1500px] mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold">📦 Scan Retur Pro</h1>
-                <p class="text-slate-500 text-sm">Pelacakan otomatis berdasarkan ID Tracking & Detail Produk.</p>
+                <h1 class="text-2xl font-bold text-blue-800">📦 QC Retur Manager</h1>
+                <p class="text-slate-500 text-xs">Filter Duplikat Aktif | Support TikTok & Shopee</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="window.location.reload()" class="px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm">Reset</button>
-                <button onclick="exportResult()" class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-sm">Simpan Laporan</button>
+                <div class="bg-white border border-slate-200 rounded-lg p-1 flex shadow-sm mr-4">
+                    <button id="showAllBtn" onclick="setFilter('all')" class="px-3 py-1 text-[10px] font-bold rounded bg-blue-600 text-white transition">SEMUA DATA</button>
+                    <button id="showUniqueBtn" onclick="setFilter('unique')" class="px-3 py-1 text-[10px] font-bold rounded text-slate-500 hover:bg-slate-100 transition">RESI UNIK (Sembunyikan Double)</button>
+                </div>
+                <button onclick="window.location.reload()" class="px-4 py-2 text-xs bg-white border border-slate-200 rounded-lg shadow-sm font-semibold">Reset</button>
+                <button onclick="exportResult()" class="px-4 py-2 text-xs bg-green-600 text-white rounded-lg shadow-sm font-semibold">Simpan Laporan</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
             <div class="lg:col-span-1 space-y-4">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold mb-3 text-blue-600 text-sm italic underline">Langkah 1: Upload CSV</h3>
+                    <label class="block text-[10px] font-bold mb-2 uppercase text-slate-400">1. Upload CSV</label>
                     <input type="file" id="csvFile" accept=".csv" class="text-xs w-full file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700">
                 </div>
-
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="font-bold mb-3 text-blue-600 text-sm italic underline">Langkah 2: Scan Resi/ID</h3>
-                    <input type="text" id="scannerInput" placeholder="Scan Tracking ID di sini..." class="w-full p-3 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono">
+                    <label class="block text-[10px] font-bold mb-2 uppercase text-slate-400">2. Scan Resi</label>
+                    <input type="text" id="scannerInput" placeholder="Scan di sini..." class="w-full p-3 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono">
                 </div>
-
-                <div class="bg-blue-700 p-6 rounded-2xl text-white shadow-xl shadow-blue-100">
-                    <p class="text-xs opacity-70 uppercase tracking-widest font-semibold">Berhasil Direkap</p>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-5xl font-bold" id="totalDone">0</span>
-                        <span class="text-sm opacity-70"> / <span id="totalData">0</span> total</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white p-4 rounded-xl border border-green-200">
+                        <p class="text-[10px] text-green-600 font-bold uppercase">Sesuai</p>
+                        <h2 class="text-2xl font-bold" id="statMatch">0</h2>
                     </div>
+                    <div class="bg-white p-4 rounded-xl border border-red-200">
+                        <p class="text-[10px] text-red-600 font-bold uppercase">Bermasalah</p>
+                        <h2 class="text-2xl font-bold" id="statWrong">0</h2>
+                    </div>
+                </div>
+                <div id="duplicateAlert" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] text-amber-700">
+                    ⚠️ Ada beberapa nomor resi yang double dalam data Anda. Gunakan tombol filter di atas untuk merapikan.
                 </div>
             </div>
 
             <div class="lg:col-span-3">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[500px]">
-                    <div class="overflow-x-auto overflow-y-auto max-h-[75vh]">
-                        <table class="w-full text-left border-collapse" id="dataTable">
-                            <thead class="sticky-header">
-                                <tr class="bg-slate-50 text-[10px] uppercase text-slate-500 font-bold tracking-wider">
-                                    <th class="p-4 border-b">Tracking ID / Resi</th>
-                                    <th class="p-4 border-b">Nama Produk</th>
-                                    <th class="p-4 border-b">SKU</th>
-                                    <th class="p-4 border-b">Variasi</th>
-                                    <th class="p-4 border-b">Qty</th>
-                                    <th class="p-4 border-b">Status</th>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto max-h-[75vh]">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky-header text-[10px] uppercase text-slate-400 font-bold">
+                                <tr>
+                                    <th class="p-4 border-b">Detail Paket</th>
+                                    <th class="p-4 border-b">Produk</th>
+                                    <th class="p-4 border-b text-center">Qty</th>
+                                    <th class="p-4 border-b">Status & Aksi</th>
+                                    <th class="p-4 border-b">Catatan QC</th>
                                 </tr>
                             </thead>
-                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
-                                <tr>
-                                    <td colspan="6" class="p-20 text-center opacity-40">Silakan unggah file CSV ekspor TikTok...</td>
-                                </tr>
+                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100 italic">
+                                <tr><td colspan="5" class="p-20 text-center opacity-40 italic font-sans">Belum ada data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -75,104 +81,143 @@
 
     <script>
         let rawData = [];
-        let completedCount = 0;
+        let currentFilter = 'all';
 
-        // Fungsi pencarian kolom yang fleksibel
         function getVal(row, keys) {
             for (let key of keys) {
-                if (row[key] !== undefined) return row[key];
+                const foundKey = Object.keys(row).find(k => k.toLowerCase().trim() === key.toLowerCase());
+                if (foundKey && row[foundKey]) return row[foundKey];
             }
-            return "N/A";
+            return "-";
         }
 
         document.getElementById('csvFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
                     rawData = results.data;
-                    document.getElementById('totalData').innerText = rawData.length;
-                    renderTable(rawData);
+                    renderTable();
                 }
             });
         });
 
-        function renderTable(data) {
+        function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            
-            data.forEach((row) => {
-                // Tracking ID / Resi
-                const tracking = getVal(row, ['Tracking ID', 'Tracking Number', 'Nomor Resi', 'ID Pelacakan', 'tracking_number']);
-                const orderId = getVal(row, ['Order ID', 'ID Pesanan', 'order_id']);
-                const product = getVal(row, ['Product Name', 'Nama Produk', 'product_name']);
-                const sku = getVal(row, ['Seller SKU', 'SKU Penjual', 'sku', 'SKU']);
-                const variation = getVal(row, ['Variation', 'Variasi', 'product_variation']);
-                const qty = getVal(row, ['Quantity', 'Jumlah', 'quantity', 'Qty']);
+            const seenResi = new Set();
+            let hasDuplicates = false;
+
+            rawData.forEach((row) => {
+                const trk = getVal(row, ['No. Resi', 'Tracking ID', 'Tracking Number', 'Nomor Resi']).trim();
+                const ord = getVal(row, ['ID Pesanan', 'Order ID', 'No. Pesanan']).trim();
+                
+                // Logika Filter Duplikat
+                const isDuplicate = seenResi.has(trk.toLowerCase());
+                if (isDuplicate) hasDuplicates = true;
+                
+                if (currentFilter === 'unique' && isDuplicate) return;
+                seenResi.add(trk.toLowerCase());
+
+                const prd = getVal(row, ['Nama Produk', 'Product Name', 'Nama Barang']);
+                const sku = getVal(row, ['SKU Penjual', 'Seller SKU', 'SKU']);
+                const varnt = getVal(row, ['Variation', 'Variasi', 'Nama Variasi']);
+                const qty = getVal(row, ['Quantity', 'Jumlah', 'Qty']);
 
                 const tr = document.createElement('tr');
-                tr.setAttribute('data-id', orderId.trim());
-                tr.setAttribute('data-resi', tracking.trim());
-                tr.className = "hover:bg-slate-50 transition-all";
+                tr.setAttribute('data-resi', trk.toLowerCase());
+                tr.className = `transition-all ${isDuplicate ? 'is-duplicate' : ''}`;
                 tr.innerHTML = `
-                    <td class="p-4"><div class="font-bold text-slate-800">${tracking}</div><div class="text-[9px] text-slate-400">${orderId}</div></td>
-                    <td class="p-4 max-w-[200px] truncate" title="${product}">${product}</td>
-                    <td class="p-4 font-mono text-slate-500">${sku}</td>
-                    <td class="p-4">${variation}</td>
-                    <td class="p-4 font-bold">${qty}</td>
-                    <td class="p-4 status-cell"><span class="bg-slate-100 text-slate-400 px-2 py-1 rounded text-[9px] font-bold">PROSES</span></td>
+                    <td class="p-4">
+                        <div class="font-bold ${isDuplicate ? 'text-amber-600' : 'text-slate-900'}">${trk} ${isDuplicate ? '(Double)' : ''}</div>
+                        <div class="text-[9px] text-slate-400 font-sans italic">${ord}</div>
+                    </td>
+                    <td class="p-4">
+                        <div class="font-medium text-slate-700 line-clamp-1 font-sans not-italic">${prd}</div>
+                        <div class="text-[9px] text-blue-500 font-mono">${sku} | ${varnt}</div>
+                    </td>
+                    <td class="p-4 text-center font-bold text-lg font-sans not-italic">${qty}</td>
+                    <td class="p-4 space-y-2">
+                        <div class="flex gap-1">
+                            <button onclick="markRow(this, 'match')" class="px-2 py-1 bg-green-50 text-green-700 border border-green-200 rounded text-[9px] font-bold hover:bg-green-100">SESUAI</button>
+                            <button onclick="markRow(this, 'wrong')" class="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded text-[9px] font-bold hover:bg-red-100">SALAH</button>
+                        </div>
+                    </td>
+                    <td class="p-4 italic">
+                        <input type="text" placeholder="Catatan..." class="w-full p-2 border border-slate-200 rounded text-[10px] outline-none focus:border-blue-500 note-input bg-transparent">
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            if(hasDuplicates) document.getElementById('duplicateAlert').classList.remove('hidden');
+            updateStats();
+        }
+
+        function setFilter(type) {
+            currentFilter = type;
+            const allBtn = document.getElementById('showAllBtn');
+            const uniqueBtn = document.getElementById('showUniqueBtn');
+
+            if (type === 'all') {
+                allBtn.className = "px-3 py-1 text-[10px] font-bold rounded bg-blue-600 text-white transition";
+                uniqueBtn.className = "px-3 py-1 text-[10px] font-bold rounded text-slate-500 hover:bg-slate-100 transition";
+            } else {
+                uniqueBtn.className = "px-3 py-1 text-[10px] font-bold rounded bg-blue-600 text-white transition";
+                allBtn.className = "px-3 py-1 text-[10px] font-bold rounded text-slate-500 hover:bg-slate-100 transition";
+            }
+            renderTable();
+        }
+
+        function markRow(btn, type) {
+            const row = btn.closest('tr');
+            row.classList.remove('row-match', 'row-wrong');
+            if (type === 'match') row.classList.add('row-match');
+            else {
+                row.classList.add('row-wrong');
+                row.querySelector('.note-input').focus();
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('statMatch').innerText = document.querySelectorAll('.row-match').length;
+            document.getElementById('statWrong').innerText = document.querySelectorAll('.row-wrong').length;
         }
 
         document.getElementById('scannerInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                const searchValue = this.value.trim().toLowerCase();
-                if (!searchValue) return;
-
-                const rows = document.querySelectorAll('#tableBody tr');
-                let found = false;
-
-                rows.forEach(row => {
-                    const id = (row.getAttribute('data-id') || "").toLowerCase();
-                    const resi = (row.getAttribute('data-resi') || "").toLowerCase();
-
-                    if ((searchValue === id || searchValue === resi) && !row.classList.contains('row-done')) {
-                        row.classList.add('row-done');
-                        row.querySelector('.status-cell').innerHTML = `<span class="bg-green-600 text-white px-2 py-1 rounded text-[9px] font-bold shadow-sm">✅ SAMPAI</span>`;
-                        completedCount++;
-                        document.querySelector('#totalDone').innerText = completedCount;
-                        found = true;
-                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                });
-
-                if (!found) alert('Data tidak ditemukan atau sudah discan!');
+                const val = this.value.trim().toLowerCase();
+                const row = document.querySelector(`tr[data-resi="${val}"]`);
+                if (row) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.classList.add('ring-2', 'ring-blue-500');
+                    setTimeout(() => row.classList.remove('ring-2', 'ring-blue-500'), 2000);
+                } else alert('Resi tidak ditemukan!');
                 this.value = '';
             }
         });
 
         function exportResult() {
             const rows = document.querySelectorAll('#tableBody tr');
-            let csvContent = "Tracking ID,Nama Produk,SKU,Variasi,Qty,Status\n";
+            let csvContent = "Resi,Produk,Qty,Status,Catatan\n";
             rows.forEach(row => {
-                if(row.children.length < 6) return;
-                const trk = row.getAttribute('data-resi');
-                const prd = row.children[1].innerText.replace(/,/g, '');
-                const sku = row.children[2].innerText;
-                const vars = row.children[3].innerText;
-                const qty = row.children[4].innerText;
-                const stts = row.classList.contains('row-done') ? "SUDAH SAMPAI" : "BELUM";
-                csvContent += `${trk},${prd},${sku},${vars},${qty},${stts}\n`;
+                if(row.children.length < 5) return;
+                const trk = row.children[0].children[0].innerText.replace('(Double)', '').trim();
+                const prd = row.children[1].children[0].innerText.replace(/,/g, '');
+                const qty = row.children[2].innerText;
+                let stts = "Belum";
+                if(row.classList.contains('row-match')) stts = "SESUAI";
+                if(row.classList.contains('row-wrong')) stts = "BERMASALAH";
+                const note = row.querySelector('.note-input').value.replace(/,/g, '');
+                csvContent += `${trk},${prd},${qty},${stts},${note}\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", "Rekap_Retur_Selesai.csv");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laporan_QC_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
         }
     </script>
