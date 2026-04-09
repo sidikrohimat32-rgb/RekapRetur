@@ -24,8 +24,8 @@
             </div>
             <div class="flex flex-wrap justify-center items-center gap-3">
                 <div class="bg-white border border-slate-200 rounded-xl p-1 flex shadow-sm">
-                    <button id="showUniqueBtn" onclick="setFilter('unique')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-blue-600 text-white transition">GABUNG RESI DOUBLE</button>
-                    <button id="showAllBtn" onclick="setFilter('all')" class="px-4 py-2 text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-100 transition">TAMPILKAN PER BARIS</button>
+                    <button id="showUniqueBtn" onclick="setFilter('unique')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-blue-600 text-white transition">GABUNG NO RESI DOUBLE</button>
+                    <button id="showAllBtn" onclick="setFilter('all')" class="px-4 py-2 text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-100 transition">TAMPILKAN PER PESANAN</button>
                 </div>
                 <button onclick="clearAllData()" class="px-4 py-2.5 text-[10px] bg-white border border-red-200 text-red-600 rounded-xl font-bold hover:bg-red-50 transition">HAPUS SEMUA</button>
                 <button onclick="exportResult()" class="px-6 py-2.5 text-[10px] bg-green-600 text-white rounded-xl shadow-lg font-black hover:bg-green-700 transition">SIMPAN LAPORAN (.CSV)</button>
@@ -39,11 +39,11 @@
                     <div class="mb-5">
                         <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase tracking-widest italic underline">Langkah 1: Upload CSV (Bisa Banyak File)</label>
                         <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold cursor-pointer">
-                        <p class="text-[9px] text-blue-500 mt-2">*Anda bisa memilih lebih dari 1 file sekaligus.</p>
+                        <p class="text-[9px] text-blue-500 mt-2">*Anda bisa menambahkan lebih dari 1 file sekaligus.</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase tracking-widest italic underline">Langkah 2: Scan Resi</label>
-                        <input type="text" id="scannerInput" placeholder="Arahkan scanner kemari..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
+                        <input type="text" id="scannerInput" placeholder="Arahkan scanner Disini ..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
                     </div>
                 </div>
 
@@ -74,11 +74,11 @@
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky-header">
                                 <tr class="bg-slate-50 text-[10px] uppercase text-slate-400 font-black">
-                                    <th class="p-5 border-b">Informasi Resi</th>
+                                    <th class="p-5 border-b">ID Pesanan/ Nomor Resi</th>
                                     <th class="p-5 border-b">Detail Barang (SKU | Variasi)</th>
                                     <th class="p-5 border-b text-center">Total Qty</th>
-                                    <th class="p-5 border-b text-center">Aksi QC</th>
-                                    <th class="p-5 border-b">Catatan Admin</th>
+                                    <th class="p-5 border-b text-center">Status Retur</th>
+                                    <th class="p-5 border-b">Catatan Retur</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
