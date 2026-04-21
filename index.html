@@ -3,79 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Retur Anti-Hilang</title>
+    <title>Monitoring Retur Real-Time</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        .row-match { background-color: #d1fae5 !important; border-left: 6px solid #10b981; }
-        .row-wrong { background-color: #fee2e2 !important; border-left: 6px solid #ef4444; }
-        .row-pending { border-left: 6px solid #f59e0b; }
+        .status-badge { padding: 2px 8px; border-radius: 99px; font-size: 9px; font-weight: 800; }
+        .bg-transit { background-color: #fef3c7; text-color: #92400e; border: 1px solid #f59e0b; }
+        .bg-delivered { background-color: #d1fae5; text-color: #065f46; border: 1px solid #10b981; }
         .sticky-header th { position: sticky; top: 0; background: #f8fafc; z-index: 10; }
-        .product-item { border-bottom: 1px solid #f1f5f9; padding: 6px 0; }
-        .product-item:last-child { border: none; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800 font-sans">
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800">
 
     <div class="max-w-[1650px] mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📦 Monitoring Retur (Memory Save)</h1>
-                <p class="text-[10px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Data Tersimpan Otomatis di Browser
-                </p>
+                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📊 Dashboard Pantauan Kurir</h1>
+                <p class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Berdasarkan Status CSV Marketplace</p>
             </div>
-            <div class="flex flex-wrap justify-center items-center gap-3">
-                <div class="bg-white border border-slate-200 rounded-xl p-1 flex shadow-sm text-[10px] font-bold">
-                    <button id="filterAll" onclick="updateDisplayFilter('all')" class="px-4 py-2 rounded-lg bg-blue-600 text-white transition">SEMUA</button>
-                    <button id="filterTransit" onclick="updateDisplayFilter('transit')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100">DI JALAN</button>
-                    <button id="filterReceived" onclick="updateDisplayFilter('received')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100">DITERIMA</button>
-                </div>
-                <button onclick="clearAllData()" class="px-4 py-2.5 text-[10px] bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all">HAPUS SEMUA DATA</button>
-                <button onclick="exportResult()" class="px-6 py-2.5 text-[10px] bg-green-600 text-white rounded-xl shadow-lg font-black hover:bg-green-700 transition">SIMPAN CSV</button>
+            <div class="flex gap-2">
+                <button onclick="clearAllData()" class="px-4 py-2 text-[10px] bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold">RESET DATA</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-3 space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <div class="mb-5">
-                        <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic">Langkah 1: Upload CSV</label>
-                        <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase italic">Langkah 2: Scan Resi</label>
-                        <input type="text" id="scannerInput" placeholder="Arahkan scanner disini..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
-                    </div>
+                    <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic">Upload CSV (Shopee/TikTok)</label>
+                    <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold cursor-pointer">
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-white p-5 rounded-3xl border-b-4 border-amber-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Transit</p>
-                        <h2 class="text-2xl font-black text-amber-600" id="statTransit">0</h2>
-                    </div>
-                    <div class="bg-white p-5 rounded-3xl border-b-4 border-green-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Diterima</p>
-                        <h2 class="text-2xl font-black text-green-600" id="statReceived">0</h2>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-4">Ringkasan Status Kurir</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-orange-600">Sedang Transit</span>
+                            <span id="countTransit" class="text-xl font-black">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-green-600">Sampai di Tujuan</span>
+                            <span id="countDelivered" class="text-xl font-black">0</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-9">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="overflow-x-auto max-h-[80vh]">
+                    <div class="overflow-x-auto max-h-[82vh]">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky-header">
                                 <tr class="bg-slate-50 text-[10px] uppercase text-slate-400 font-black">
-                                    <th class="p-5 border-b">Pesanan / Resi</th>
-                                    <th class="p-5 border-b">Produk</th>
-                                    <th class="p-5 border-b text-center">Qty</th>
-                                    <th class="p-5 border-b text-center">Status Fisik</th>
-                                    <th class="p-5 border-b">Catatan</th>
+                                    <th class="p-5 border-b">No. Resi & Pesanan</th>
+                                    <th class="p-5 border-b">Detail Produk</th>
+                                    <th class="p-5 border-b">Status Kurir</th>
+                                    <th class="p-5 border-b">Waktu Terakhir</th>
+                                    <th class="p-5 border-b text-center">Fisik (Scan)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100 italic">
-                                </tbody>
+                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
+                                <tr><td colspan="5" class="p-20 text-center text-slate-300 font-bold">Silakan Upload Data CSV 30 Hari Terakhir</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -84,19 +72,10 @@
     </div>
 
     <script>
-        // GLOBAL DATA
-        let rawData = JSON.parse(localStorage.getItem('retur_rawData')) || [];
-        let scanStates = JSON.parse(localStorage.getItem('retur_scanStates')) || {};
-        let notes = JSON.parse(localStorage.getItem('retur_notes')) || {};
-        let displayMode = 'all';
-
-        // Inisialisasi saat pertama buka
-        window.onload = () => { renderTable(); };
+        let rawData = JSON.parse(localStorage.getItem('monitor_data')) || [];
 
         function saveData() {
-            localStorage.setItem('retur_rawData', JSON.stringify(rawData));
-            localStorage.setItem('retur_scanStates', JSON.stringify(scanStates));
-            localStorage.setItem('retur_notes', JSON.stringify(notes));
+            localStorage.setItem('monitor_data', JSON.stringify(rawData));
         }
 
         function getVal(row, keys) {
@@ -109,8 +88,6 @@
 
         document.getElementById('csvFile').addEventListener('change', function(e) {
             const files = e.target.files;
-            if (!files.length) return;
-
             Array.from(files).forEach(file => {
                 Papa.parse(file, {
                     header: true, skipEmptyLines: true,
@@ -121,122 +98,77 @@
                     }
                 });
             });
-            this.value = '';
         });
 
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            if (rawData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-40 text-center text-slate-300 font-bold">SILAKAN UPLOAD FILE CSV...</td></tr>';
-                return;
-            }
+            let transit = 0;
+            let delivered = 0;
 
+            // Merge per resi
             const merged = {};
             rawData.forEach(row => {
-                const trk = getVal(row, ['No. Resi', 'Tracking ID', 'Nomor Resi', 'No. Pelacakan']);
-                if (!merged[trk]) {
-                    merged[trk] = {
-                        tracking: trk,
-                        orderId: getVal(row, ['ID Pesanan', 'Order ID', 'No. Pesanan']),
-                        products: [],
-                        totalQty: 0
+                const resi = getVal(row, ['No. Resi', 'Tracking Number', 'Tracking ID']);
+                if (!merged[resi]) {
+                    // Deteksi Status
+                    const statusSistem = getVal(row, ['Status Pesanan', 'Order Status', 'Status']);
+                    const waktu = getVal(row, ['Waktu Selesai', 'Order Update Time', 'Waktu Kirim']);
+                    
+                    // Logic Sederhana: Jika status ada kata "Selesai" atau "Sampai", anggap Delivered
+                    const isArrived = statusSistem.toLowerCase().includes('selesai') || 
+                                     statusSistem.toLowerCase().includes('diterima') ||
+                                     statusSistem.toLowerCase().includes('delivered');
+
+                    if(isArrived) delivered++; else transit++;
+
+                    merged[resi] = {
+                        resi: resi,
+                        orderId: getVal(row, ['ID Pesanan', 'Order ID']),
+                        status: statusSistem,
+                        waktu: waktu,
+                        isArrived: isArrived,
+                        product: getVal(row, ['Nama Produk', 'Nama Barang'])
                     };
                 }
-                merged[trk].products.push({
-                    name: getVal(row, ['Nama Produk', 'Nama Barang']),
-                    qty: parseInt(getVal(row, ['Quantity', 'Jumlah', 'Qty'])) || 0
-                });
-                merged[trk].totalQty += parseInt(getVal(row, ['Quantity', 'Jumlah', 'Qty'])) || 0;
             });
 
             Object.values(merged).forEach(item => {
-                const state = scanStates[item.tracking.toLowerCase()];
-                if (displayMode === 'transit' && state) return;
-                if (displayMode === 'received' && !state) return;
-
                 const tr = document.createElement('tr');
-                tr.setAttribute('data-resi', item.tracking.toLowerCase());
-                tr.className = state === 'match' ? 'row-match' : (state === 'wrong' ? 'row-wrong' : 'row-pending');
-
+                tr.className = "hover:bg-slate-50";
                 tr.innerHTML = `
                     <td class="p-5 font-bold">
-                        <div>${item.tracking}</div>
+                        <div class="text-blue-900">${item.resi}</div>
                         <div class="text-[9px] text-slate-400 font-mono">${item.orderId}</div>
                     </td>
-                    <td class="p-5">${item.products.map(p => `<div class="product-item">${p.name}</div>`).join('')}</td>
-                    <td class="p-5 text-center font-black text-lg">${item.totalQty}</td>
+                    <td class="p-5 text-slate-600">${item.product}</td>
                     <td class="p-5">
-                        <div class="flex gap-1 justify-center">
-                            <button onclick="markRow('${item.tracking}', 'match')" class="p-2 bg-green-50 text-green-700 border rounded-lg text-[9px] font-bold">OK</button>
-                            <button onclick="markRow('${item.tracking}', 'wrong')" class="p-2 bg-red-50 text-red-700 border rounded-lg text-[9px] font-bold">SALAH</button>
-                        </div>
+                        <span class="status-badge ${item.isArrived ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+                            ${item.status}
+                        </span>
                     </td>
-                    <td class="p-5">
-                        <textarea oninput="saveNote('${item.tracking}', this.value)" class="w-full p-2 bg-white/50 border rounded text-[10px] outline-none" rows="1">${notes[item.tracking] || ''}</textarea>
+                    <td class="p-5 font-mono text-slate-500">${item.waktu}</td>
+                    <td class="p-5 text-center">
+                        <input type="checkbox" class="w-4 h-4 accent-blue-600">
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-            updateStats();
-        }
 
-        function markRow(resi, type) {
-            scanStates[resi.toLowerCase()] = type;
-            saveData();
-            renderTable();
+            document.getElementById('countTransit').innerText = transit;
+            document.getElementById('countDelivered').innerText = delivered;
         }
-
-        function saveNote(resi, val) {
-            notes[resi] = val;
-            saveData();
-        }
-
-        function updateDisplayFilter(mode) {
-            displayMode = mode;
-            renderTable();
-        }
-
-        function updateStats() {
-            const allUniq = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking ID', 'Nomor Resi']).toLowerCase()))];
-            const recCount = Object.keys(scanStates).length;
-            document.getElementById('statReceived').innerText = recCount;
-            document.getElementById('statTransit').innerText = allUniq.length - recCount;
-        }
-
-        document.getElementById('scannerInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const val = this.value.trim().toLowerCase();
-                if (rawData.some(r => getVal(r, ['No. Resi', 'Tracking ID']).toLowerCase() === val)) {
-                    scanStates[val] = 'match';
-                    saveData();
-                    renderTable();
-                    this.value = '';
-                } else {
-                    alert("Resi Tidak Ada di Data!");
-                    this.value = '';
-                }
-            }
-        });
 
         function clearAllData() {
-            if (confirm("Hapus semua data di memori browser?")) {
+            if(confirm("Hapus semua riwayat rekap?")) {
                 localStorage.clear();
-                rawData = []; scanStates = {}; notes = {};
+                rawData = [];
                 renderTable();
             }
         }
 
-        function exportResult() {
-            let csv = "Nomor Resi,Qty,Status Fisik,Catatan\n";
-            Object.keys(scanStates).forEach(trk => {
-                csv += `${trk},1,${scanStates[trk]},${notes[trk] || ''}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = "Laporan_Retur_Final.csv";
-            a.click();
-        }
+        window.onload = renderTable;
     </script>
+</body>
+</html>
