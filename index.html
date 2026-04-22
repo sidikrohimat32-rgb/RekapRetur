@@ -3,36 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Retur Anti-Hilang</title>
+    <title>Rekap Retur - Versi Final Perbaikan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         .row-match { background-color: #d1fae5 !important; border-left: 6px solid #10b981; }
         .row-wrong { background-color: #fee2e2 !important; border-left: 6px solid #ef4444; }
-        .row-pending { border-left: 6px solid #f59e0b; }
         .sticky-header th { position: sticky; top: 0; background: #f8fafc; z-index: 10; }
-        .product-item { border-bottom: 1px solid #f1f5f9; padding: 6px 0; }
-        .product-item:last-child { border: none; }
+        .product-item { border-bottom: 1px solid #f1f5f9; padding: 4px 0; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800 font-sans">
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800">
 
     <div class="max-w-[1650px] mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📦 Monitoring Retur (Memory Save)</h1>
-                <p class="text-[10px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Data Tersimpan Otomatis di Browser
-                </p>
+                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📦 Rekap Retur & Monitor Kurir</h1>
+                <p class="text-[10px] text-green-600 font-bold uppercase tracking-widest">Status & Tanggal Sesuai CSV</p>
             </div>
             <div class="flex flex-wrap justify-center items-center gap-3">
-                <div class="bg-white border border-slate-200 rounded-xl p-1 flex shadow-sm text-[10px] font-bold">
-                    <button id="filterAll" onclick="updateDisplayFilter('all')" class="px-4 py-2 rounded-lg bg-blue-600 text-white transition">SEMUA</button>
-                    <button id="filterTransit" onclick="updateDisplayFilter('transit')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100">DI JALAN</button>
-                    <button id="filterReceived" onclick="updateDisplayFilter('received')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100">DITERIMA</button>
-                </div>
                 <button onclick="clearAllData()" class="px-4 py-2.5 text-[10px] bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all">HAPUS SEMUA DATA</button>
-                <button onclick="exportResult()" class="px-6 py-2.5 text-[10px] bg-green-600 text-white rounded-xl shadow-lg font-black hover:bg-green-700 transition">SIMPAN CSV</button>
+                <button onclick="exportResult()" class="px-6 py-2.5 text-[10px] bg-green-600 text-white rounded-xl shadow-lg font-black hover:bg-green-700 transition">SIMPAN LAPORAN (.CSV)</button>
             </div>
         </header>
 
@@ -40,42 +31,44 @@
             <div class="lg:col-span-3 space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <div class="mb-5">
-                        <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic">Langkah 1: Upload CSV</label>
-                        <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold">
+                        <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic underline">Langkah 1: Upload CSV</label>
+                        <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase italic">Langkah 2: Scan Resi</label>
-                        <input type="text" id="scannerInput" placeholder="Arahkan scanner disini..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
+                        <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase italic underline">Langkah 2: Scan Resi</label>
+                        <input type="text" id="scannerInput" placeholder="Arahkan scanner Disini ..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white p-5 rounded-3xl border-b-4 border-amber-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Transit</p>
-                        <h2 class="text-2xl font-black text-amber-600" id="statTransit">0</h2>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">Transit (Belum Scan)</p>
+                        <h2 class="text-3xl font-black text-amber-600" id="statTransit">0</h2>
                     </div>
                     <div class="bg-white p-5 rounded-3xl border-b-4 border-green-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Diterima</p>
-                        <h2 class="text-2xl font-black text-green-600" id="statReceived">0</h2>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">Diterima (Sudah Scan)</p>
+                        <h2 class="text-3xl font-black text-green-600" id="statReceived">0</h2>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-9">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="overflow-x-auto max-h-[80vh]">
+                    <div class="overflow-x-auto max-h-[82vh]">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky-header">
                                 <tr class="bg-slate-50 text-[10px] uppercase text-slate-400 font-black">
-                                    <th class="p-5 border-b">Pesanan / Resi</th>
+                                    <th class="p-5 border-b">ID Pesanan & Resi</th>
                                     <th class="p-5 border-b">Produk</th>
-                                    <th class="p-5 border-b text-center">Qty</th>
-                                    <th class="p-5 border-b text-center">Status Fisik</th>
+                                    <th class="p-5 border-b bg-blue-50/50">Status Kurir</th>
+                                    <th class="p-5 border-b bg-blue-50/50">Tanggal Update</th>
+                                    <th class="p-5 border-b text-center">Fisik (QC)</th>
                                     <th class="p-5 border-b">Catatan</th>
                                 </tr>
                             </thead>
-                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100 italic">
-                                </tbody>
+                            <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
+                                <tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold">MENUNGGU DATA CSV...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -84,19 +77,14 @@
     </div>
 
     <script>
-        // GLOBAL DATA
-        let rawData = JSON.parse(localStorage.getItem('retur_rawData')) || [];
-        let scanStates = JSON.parse(localStorage.getItem('retur_scanStates')) || {};
-        let notes = JSON.parse(localStorage.getItem('retur_notes')) || {};
-        let displayMode = 'all';
+        let rawData = JSON.parse(localStorage.getItem('retur_v2_data')) || [];
+        let scanStates = JSON.parse(localStorage.getItem('retur_v2_scan')) || {};
 
-        // Inisialisasi saat pertama buka
-        window.onload = () => { renderTable(); };
+        window.onload = renderTable;
 
         function saveData() {
-            localStorage.setItem('retur_rawData', JSON.stringify(rawData));
-            localStorage.setItem('retur_scanStates', JSON.stringify(scanStates));
-            localStorage.setItem('retur_notes', JSON.stringify(notes));
+            localStorage.setItem('retur_v2_data', JSON.stringify(rawData));
+            localStorage.setItem('retur_v2_scan', JSON.stringify(scanStates));
         }
 
         function getVal(row, keys) {
@@ -109,8 +97,6 @@
 
         document.getElementById('csvFile').addEventListener('change', function(e) {
             const files = e.target.files;
-            if (!files.length) return;
-
             Array.from(files).forEach(file => {
                 Papa.parse(file, {
                     header: true, skipEmptyLines: true,
@@ -129,52 +115,59 @@
             tbody.innerHTML = '';
             
             if (rawData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-40 text-center text-slate-300 font-bold">SILAKAN UPLOAD FILE CSV...</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold">DATA KOSONG</td></tr>';
+                updateStats(); // Pastikan angka 0 jika data kosong
                 return;
             }
 
             const merged = {};
             rawData.forEach(row => {
-                const trk = getVal(row, ['No. Resi', 'Tracking ID', 'Nomor Resi', 'No. Pelacakan']);
+                const trk = getVal(row, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi', 'No. Pelacakan']);
                 if (!merged[trk]) {
                     merged[trk] = {
-                        tracking: trk,
+                        resi: trk,
                         orderId: getVal(row, ['ID Pesanan', 'Order ID', 'No. Pesanan']),
-                        products: [],
-                        totalQty: 0
+                        marketStatus: getVal(row, ['Status Pesanan', 'Order Status', 'Status']),
+                        updateTime: getVal(row, ['Waktu Selesai', 'Order Update Time', 'Waktu Status', 'Waktu Pesanan Selesai']),
+                        products: []
                     };
                 }
                 merged[trk].products.push({
                     name: getVal(row, ['Nama Produk', 'Nama Barang']),
-                    qty: parseInt(getVal(row, ['Quantity', 'Jumlah', 'Qty'])) || 0
+                    qty: getVal(row, ['Quantity', 'Jumlah', 'Qty'])
                 });
-                merged[trk].totalQty += parseInt(getVal(row, ['Quantity', 'Jumlah', 'Qty'])) || 0;
             });
 
             Object.values(merged).forEach(item => {
-                const state = scanStates[item.tracking.toLowerCase()];
-                if (displayMode === 'transit' && state) return;
-                if (displayMode === 'received' && !state) return;
-
+                const state = scanStates[item.resi.toLowerCase()] || "";
                 const tr = document.createElement('tr');
-                tr.setAttribute('data-resi', item.tracking.toLowerCase());
-                tr.className = state === 'match' ? 'row-match' : (state === 'wrong' ? 'row-wrong' : 'row-pending');
+                tr.setAttribute('data-resi', item.resi.toLowerCase());
+                tr.className = state === 'match' ? 'row-match' : (state === 'wrong' ? 'row-wrong' : 'hover:bg-slate-50 transition-all');
 
                 tr.innerHTML = `
                     <td class="p-5 font-bold">
-                        <div>${item.tracking}</div>
-                        <div class="text-[9px] text-slate-400 font-mono">${item.orderId}</div>
+                        <div class="text-blue-900">${item.resi}</div>
+                        <div class="text-[9px] text-slate-400 font-mono italic">${item.orderId}</div>
                     </td>
-                    <td class="p-5">${item.products.map(p => `<div class="product-item">${p.name}</div>`).join('')}</td>
-                    <td class="p-5 text-center font-black text-lg">${item.totalQty}</td>
+                    <td class="p-5">${item.products.map(p => `<div class="product-item">${p.name} (x${p.qty})</div>`).join('')}</td>
+                    
                     <td class="p-5">
-                        <div class="flex gap-1 justify-center">
-                            <button onclick="markRow('${item.tracking}', 'match')" class="p-2 bg-green-50 text-green-700 border rounded-lg text-[9px] font-bold">OK</button>
-                            <button onclick="markRow('${item.tracking}', 'wrong')" class="p-2 bg-red-50 text-red-700 border rounded-lg text-[9px] font-bold">SALAH</button>
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-md font-bold text-[9px] border border-blue-100 uppercase">
+                            ${item.marketStatus}
+                        </span>
+                    </td>
+                    <td class="p-5 text-slate-500 font-mono font-bold">
+                        ${item.updateTime}
+                    </td>
+
+                    <td class="p-5">
+                        <div class="flex flex-col gap-1">
+                            <button onclick="markRow('${item.resi}', 'match')" class="py-1 px-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-[9px] font-black hover:bg-green-200">OK</button>
+                            <button onclick="markRow('${item.resi}', 'wrong')" class="py-1 px-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[9px] font-black hover:bg-red-200">REJECT</button>
                         </div>
                     </td>
                     <td class="p-5">
-                        <textarea oninput="saveNote('${item.tracking}', this.value)" class="w-full p-2 bg-white/50 border rounded text-[10px] outline-none" rows="1">${notes[item.tracking] || ''}</textarea>
+                        <textarea oninput="saveNote('${item.resi}', this.value)" placeholder="..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] outline-none" rows="1">${localStorage.getItem('note_'+item.resi) || ''}</textarea>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -189,55 +182,71 @@
         }
 
         function saveNote(resi, val) {
-            notes[resi] = val;
-            saveData();
-        }
-
-        function updateDisplayFilter(mode) {
-            displayMode = mode;
-            renderTable();
+            localStorage.setItem('note_'+resi, val);
         }
 
         function updateStats() {
-            const allUniq = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking ID', 'Nomor Resi']).toLowerCase()))];
-            const recCount = Object.keys(scanStates).length;
-            document.getElementById('statReceived').innerText = recCount;
-            document.getElementById('statTransit').innerText = allUniq.length - recCount;
+            // Hitung data unik berdasarkan resi
+            const resis = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi']).toLowerCase()))];
+            const totalUniq = resis.length;
+            const receivedCount = Object.keys(scanStates).length;
+            const transitCount = totalUniq - receivedCount;
+
+            document.getElementById('statReceived').innerText = rawData.length === 0 ? 0 : receivedCount;
+            document.getElementById('statTransit').innerText = rawData.length === 0 ? 0 : (transitCount < 0 ? 0 : transitCount);
         }
 
         document.getElementById('scannerInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const val = this.value.trim().toLowerCase();
-                if (rawData.some(r => getVal(r, ['No. Resi', 'Tracking ID']).toLowerCase() === val)) {
+                if (val && document.querySelector(`tr[data-resi="${val}"]`)) {
                     scanStates[val] = 'match';
                     saveData();
                     renderTable();
+                    document.querySelector(`tr[data-resi="${val}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' });
                     this.value = '';
                 } else {
-                    alert("Resi Tidak Ada di Data!");
+                    alert("Resi Tidak Ditemukan!");
                     this.value = '';
                 }
             }
         });
 
         function clearAllData() {
-            if (confirm("Hapus semua data di memori browser?")) {
+            if(confirm("Hapus permanen semua data dan reset angka?")) {
                 localStorage.clear();
-                rawData = []; scanStates = {}; notes = {};
+                rawData = []; 
+                scanStates = {};
+                
+                // Reset tabel
                 renderTable();
+                
+                // Paksa reset angka stat di dashboard ke 0
+                document.getElementById('statMatch') ? document.getElementById('statMatch').innerText = "0" : null;
+                document.getElementById('statWrong') ? document.getElementById('statWrong').innerText = "0" : null;
+                document.getElementById('statReceived').innerText = "0";
+                document.getElementById('statTransit').innerText = "0";
             }
         }
 
         function exportResult() {
-            let csv = "Nomor Resi,Qty,Status Fisik,Catatan\n";
-            Object.keys(scanStates).forEach(trk => {
-                csv += `${trk},1,${scanStates[trk]},${notes[trk] || ''}\n`;
+            if (rawData.length === 0) return alert("Data kosong.");
+            let csv = "Nomor Resi,ID Pesanan,Status Kurir,Waktu Update,Status Fisik,Catatan\n";
+            const resis = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi'])))];
+            
+            resis.forEach(trk => {
+                const item = rawData.find(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi']) === trk);
+                const fisik = scanStates[trk.toLowerCase()] === 'match' ? "OK" : (scanStates[trk.toLowerCase()] === 'wrong' ? "REJECT" : "BELUM TERIMA");
+                const note = (localStorage.getItem('note_'+trk) || "").replace(/,/g, '|');
+                
+                csv += `${trk},${getVal(item, ['ID Pesanan', 'Order ID'])},${getVal(item, ['Status Pesanan', 'Status'])},${getVal(item, ['Waktu Selesai', 'Waktu Status'])},${fisik},${note}\n`;
             });
+
             const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = "Laporan_Retur_Final.csv";
-            a.click();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Laporan_Retur_Final.csv`;
+            link.click();
         }
     </script>
 </body>
