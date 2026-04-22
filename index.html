@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Retur - Versi Final Perbaikan</title>
+    <title>Monitoring Retur V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
@@ -18,8 +18,8 @@
     <div class="max-w-[1650px] mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📦 Rekap Retur & Monitor Kurir</h1>
-                <p class="text-[10px] text-green-600 font-bold uppercase tracking-widest">Status & Tanggal Sesuai CSV</p>
+                <h1 class="text-2xl font-black text-blue-900 tracking-tight">📦 Dashboard Monitoring Retur</h1>
+                <p class="text-[10px] text-green-600 font-bold uppercase tracking-widest italic">Sinkronisasi Data Otomatis</p>
             </div>
             <div class="flex flex-wrap justify-center items-center gap-3">
                 <button onclick="clearAllData()" class="px-4 py-2.5 text-[10px] bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all">HAPUS SEMUA DATA</button>
@@ -31,22 +31,22 @@
             <div class="lg:col-span-3 space-y-4">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                     <div class="mb-5">
-                        <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic underline">Langkah 1: Upload CSV</label>
+                        <label class="block text-[10px] font-black mb-2 text-slate-400 uppercase italic underline">Upload CSV Terbaru</label>
                         <input type="file" id="csvFile" accept=".csv" multiple class="text-xs w-full file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 font-bold cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase italic underline">Langkah 2: Scan Resi</label>
-                        <input type="text" id="scannerInput" placeholder="Arahkan scanner Disini ..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
+                        <label class="block text-[10px] font-black mb-2 text-blue-600 uppercase italic underline">Scan Resi Disini</label>
+                        <input type="text" id="scannerInput" placeholder="Scan..." class="w-full p-4 bg-slate-100 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-mono text-sm shadow-inner">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white p-5 rounded-3xl border-b-4 border-amber-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Transit (Belum Scan)</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">Dalam Perjalanan</p>
                         <h2 class="text-3xl font-black text-amber-600" id="statTransit">0</h2>
                     </div>
                     <div class="bg-white p-5 rounded-3xl border-b-4 border-green-500 shadow-sm text-center">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">Diterima (Sudah Scan)</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">Sudah Sampai</p>
                         <h2 class="text-3xl font-black text-green-600" id="statReceived">0</h2>
                     </div>
                 </div>
@@ -58,16 +58,16 @@
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky-header">
                                 <tr class="bg-slate-50 text-[10px] uppercase text-slate-400 font-black">
-                                    <th class="p-5 border-b">ID Pesanan & Resi</th>
+                                    <th class="p-5 border-b">Detail Pesanan</th>
                                     <th class="p-5 border-b">Produk</th>
-                                    <th class="p-5 border-b bg-blue-50/50">Status Kurir</th>
-                                    <th class="p-5 border-b bg-blue-50/50">Tanggal Update</th>
-                                    <th class="p-5 border-b text-center">Fisik (QC)</th>
-                                    <th class="p-5 border-b">Catatan</th>
+                                    <th class="p-5 border-b bg-blue-50/50">Status Paket</th>
+                                    <th class="p-5 border-b bg-blue-50/50">Tanggal Retur</th>
+                                    <th class="p-5 border-b text-center">QC Fisik</th>
+                                    <th class="p-5 border-b">Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="text-[11px] divide-y divide-slate-100">
-                                <tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold">MENUNGGU DATA CSV...</td></tr>
+                                <tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold uppercase tracking-widest">Silakan Input File CSV Marketplace</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -77,14 +77,14 @@
     </div>
 
     <script>
-        let rawData = JSON.parse(localStorage.getItem('retur_v2_data')) || [];
-        let scanStates = JSON.parse(localStorage.getItem('retur_v2_scan')) || {};
+        let rawData = JSON.parse(localStorage.getItem('retur_v3_data')) || [];
+        let scanStates = JSON.parse(localStorage.getItem('retur_v3_scan')) || {};
 
         window.onload = renderTable;
 
         function saveData() {
-            localStorage.setItem('retur_v2_data', JSON.stringify(rawData));
-            localStorage.setItem('retur_v2_scan', JSON.stringify(scanStates));
+            localStorage.setItem('retur_v3_data', JSON.stringify(rawData));
+            localStorage.setItem('retur_v3_scan', JSON.stringify(scanStates));
         }
 
         function getVal(row, keys) {
@@ -93,6 +93,21 @@
                 if (foundKey && row[foundKey]) return row[foundKey].trim();
             }
             return "-";
+        }
+
+        // Fungsi khusus format tanggal (Hanya ambil tanggal, buang jam)
+        function formatDateOnly(dateTimeStr) {
+            if (!dateTimeStr || dateTimeStr === "-") return "-";
+            // Memisahkan berdasarkan spasi jika formatnya "DD/MM/YYYY HH:MM:SS"
+            return dateTimeStr.split(' ')[0];
+        }
+
+        // Fungsi mapping status sesuai request
+        function mapStatus(status) {
+            const s = status.toLowerCase();
+            if (s.includes('dibatalkan')) return "SUDAH SAMPAI";
+            if (s.includes('transit')) return "DALAM PERJALANAN";
+            return status.toUpperCase();
         }
 
         document.getElementById('csvFile').addEventListener('change', function(e) {
@@ -115,20 +130,22 @@
             tbody.innerHTML = '';
             
             if (rawData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold">DATA KOSONG</td></tr>';
-                updateStats(); // Pastikan angka 0 jika data kosong
+                tbody.innerHTML = '<tr><td colspan="6" class="p-40 text-center text-slate-300 font-bold uppercase">BELUM ADA DATA</td></tr>';
+                updateStats(0, 0);
                 return;
             }
 
             const merged = {};
             rawData.forEach(row => {
-                const trk = getVal(row, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi', 'No. Pelacakan']);
+                const trk = getVal(row, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi']);
                 if (!merged[trk]) {
                     merged[trk] = {
                         resi: trk,
-                        orderId: getVal(row, ['ID Pesanan', 'Order ID', 'No. Pesanan']),
-                        marketStatus: getVal(row, ['Status Pesanan', 'Order Status', 'Status']),
-                        updateTime: getVal(row, ['Waktu Selesai', 'Order Update Time', 'Waktu Status', 'Waktu Pesanan Selesai']),
+                        orderId: getVal(row, ['ID Pesanan', 'Order ID']),
+                        // Mengambil dari kolom "Order Substatus" sesuai gambar
+                        rawStatus: getVal(row, ['Order Substatus', 'Status Pesanan', 'Status']),
+                        // Mengambil dari kolom "Cancelled Time" sesuai gambar
+                        rawDate: getVal(row, ['Cancelled Time', 'Waktu Selesai', 'Order Update Time']),
                         products: []
                     };
                 }
@@ -138,7 +155,16 @@
                 });
             });
 
+            let countArrived = 0;
+            let countInTransit = 0;
+
             Object.values(merged).forEach(item => {
+                const statusTeks = mapStatus(item.rawStatus);
+                const tanggalTeks = formatDateOnly(item.rawDate);
+                
+                if (statusTeks === "SUDAH SAMPAI") countArrived++;
+                if (statusTeks === "DALAM PERJALANAN") countInTransit++;
+
                 const state = scanStates[item.resi.toLowerCase()] || "";
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-resi', item.resi.toLowerCase());
@@ -152,27 +178,27 @@
                     <td class="p-5">${item.products.map(p => `<div class="product-item">${p.name} (x${p.qty})</div>`).join('')}</td>
                     
                     <td class="p-5">
-                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded-md font-bold text-[9px] border border-blue-100 uppercase">
-                            ${item.marketStatus}
+                        <span class="px-2 py-1 ${statusTeks === 'SUDAH SAMPAI' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-amber-100 text-amber-700 border-amber-200'} rounded-md font-black text-[9px] border uppercase">
+                            ${statusTeks}
                         </span>
                     </td>
-                    <td class="p-5 text-slate-500 font-mono font-bold">
-                        ${item.updateTime}
+                    <td class="p-5 text-slate-600 font-mono font-bold">
+                        ${tanggalTeks}
                     </td>
 
                     <td class="p-5">
                         <div class="flex flex-col gap-1">
-                            <button onclick="markRow('${item.resi}', 'match')" class="py-1 px-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-[9px] font-black hover:bg-green-200">OK</button>
-                            <button onclick="markRow('${item.resi}', 'wrong')" class="py-1 px-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[9px] font-black hover:bg-red-200">REJECT</button>
+                            <button onclick="markRow('${item.resi}', 'match')" class="py-1 px-3 bg-green-50 text-green-700 border border-green-200 rounded-lg text-[9px] font-black hover:bg-green-200 uppercase">OK</button>
+                            <button onclick="markRow('${item.resi}', 'wrong')" class="py-1 px-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[9px] font-black hover:bg-red-200 uppercase">Reject</button>
                         </div>
                     </td>
                     <td class="p-5">
-                        <textarea oninput="saveNote('${item.resi}', this.value)" placeholder="..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] outline-none" rows="1">${localStorage.getItem('note_'+item.resi) || ''}</textarea>
+                        <textarea oninput="saveNote('${item.resi}', this.value)" placeholder="Tambahkan catatan..." class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] outline-none" rows="1">${localStorage.getItem('note_v3_'+item.resi) || ''}</textarea>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-            updateStats();
+            updateStats(countInTransit, countArrived);
         }
 
         function markRow(resi, type) {
@@ -182,18 +208,12 @@
         }
 
         function saveNote(resi, val) {
-            localStorage.setItem('note_'+resi, val);
+            localStorage.setItem('note_v3_'+resi, val);
         }
 
-        function updateStats() {
-            // Hitung data unik berdasarkan resi
-            const resis = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi']).toLowerCase()))];
-            const totalUniq = resis.length;
-            const receivedCount = Object.keys(scanStates).length;
-            const transitCount = totalUniq - receivedCount;
-
-            document.getElementById('statReceived').innerText = rawData.length === 0 ? 0 : receivedCount;
-            document.getElementById('statTransit').innerText = rawData.length === 0 ? 0 : (transitCount < 0 ? 0 : transitCount);
+        function updateStats(transit, arrived) {
+            document.getElementById('statTransit').innerText = transit;
+            document.getElementById('statReceived').innerText = arrived;
         }
 
         document.getElementById('scannerInput').addEventListener('keypress', function(e) {
@@ -206,46 +226,40 @@
                     document.querySelector(`tr[data-resi="${val}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' });
                     this.value = '';
                 } else {
-                    alert("Resi Tidak Ditemukan!");
+                    alert("Resi Tidak Ditemukan di List!");
                     this.value = '';
                 }
             }
         });
 
         function clearAllData() {
-            if(confirm("Hapus permanen semua data dan reset angka?")) {
+            if(confirm("Hapus semua data secara permanen?")) {
                 localStorage.clear();
                 rawData = []; 
                 scanStates = {};
-                
-                // Reset tabel
                 renderTable();
-                
-                // Paksa reset angka stat di dashboard ke 0
-                document.getElementById('statMatch') ? document.getElementById('statMatch').innerText = "0" : null;
-                document.getElementById('statWrong') ? document.getElementById('statWrong').innerText = "0" : null;
-                document.getElementById('statReceived').innerText = "0";
-                document.getElementById('statTransit').innerText = "0";
             }
         }
 
         function exportResult() {
             if (rawData.length === 0) return alert("Data kosong.");
-            let csv = "Nomor Resi,ID Pesanan,Status Kurir,Waktu Update,Status Fisik,Catatan\n";
+            let csv = "Nomor Resi,ID Pesanan,Status Paket,Tanggal Retur,QC Fisik,Catatan\n";
             const resis = [...new Set(rawData.map(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi'])))];
             
             resis.forEach(trk => {
                 const item = rawData.find(r => getVal(r, ['No. Resi', 'Tracking Number', 'Tracking ID', 'Nomor Resi']) === trk);
-                const fisik = scanStates[trk.toLowerCase()] === 'match' ? "OK" : (scanStates[trk.toLowerCase()] === 'wrong' ? "REJECT" : "BELUM TERIMA");
-                const note = (localStorage.getItem('note_'+trk) || "").replace(/,/g, '|');
+                const statusPkt = mapStatus(getVal(item, ['Order Substatus', 'Status']));
+                const tglRetur = formatDateOnly(getVal(item, ['Cancelled Time', 'Waktu Selesai']));
+                const fisik = scanStates[trk.toLowerCase()] === 'match' ? "OK" : (scanStates[trk.toLowerCase()] === 'wrong' ? "REJECT" : "PENDING");
+                const note = (localStorage.getItem('note_v3_'+trk) || "").replace(/,/g, '|');
                 
-                csv += `${trk},${getVal(item, ['ID Pesanan', 'Order ID'])},${getVal(item, ['Status Pesanan', 'Status'])},${getVal(item, ['Waktu Selesai', 'Waktu Status'])},${fisik},${note}\n`;
+                csv += `${trk},${getVal(item, ['ID Pesanan', 'Order ID'])},${statusPkt},${tglRetur},${fisik},${note}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Laporan_Retur_Final.csv`;
+            link.download = `Rekap_Retur_Fixed.csv`;
             link.click();
         }
     </script>
